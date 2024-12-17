@@ -125,30 +125,6 @@ export const getStats: RequestHandler = async (request, response, next) => {
       ])
     );
 
-    const getHighestMood = (moodPercentages: Record<string, string>) => {
-      const priorityOrder = [
-        "Very Positive",
-        "Positive",
-        "Neutral",
-        "Negative",
-        "Very Negative",
-      ];
-
-      const sortedMoods = Object.entries(moodPercentages).sort(
-        (a, b) => Number(b[1].replace("%", "")) - Number(a[1].replace("%", ""))
-      );
-
-      for (const mood of priorityOrder) {
-        if (sortedMoods.find(([key]) => key === mood)) {
-          return mood;
-        }
-      }
-
-      return sortedMoods[0][0];
-    };
-
-    const highestMood = getHighestMood(moodPercentages);
-
     const totalConversation = convRate[0]?.totalMessage
       ? Number(convRate[0].totalMessage)
       : 0;
@@ -165,13 +141,17 @@ export const getStats: RequestHandler = async (request, response, next) => {
             };
           }) || null,
         averageMood: moodPercentages,
-        highestMood,
         averageUrgencyPerWeek: avgUrgency[0]?.averageUrgency || 0,
         sentimentRateThisWeek: sentimentRateWeek.map((s) => ({
           day: s.day.trim(),
           sentimentRate: `${s.sentimentRate}`,
         })),
-        topUser: topUser[0] || { userId: null, messageCount: 0 },
+        topUser: topUser.map((user) => {
+          return {
+            ...user,
+            messageCount: Number(user.messageCount),
+          };
+        })[0] || { userId: null, messageCount: 0 },
         userWithLowestSentiment: userWithLowestSentiment[0] || {
           userId: null,
           averageSentiment: null,
