@@ -113,10 +113,6 @@ export const getStats: RequestHandler = async (request, response, next) => {
       },
     });
   } catch (err) {
-    console.log(err);
-    response.send({
-      status: "error",
-      error: err,
-    });
+    next(err);
   }
 };
